@@ -1,0 +1,6 @@
+[package]
+name = "qss"
+version = "0.1.0"
+authors = ["Bhavani Shankar <ebhavanishankar@gmail.com>"]
+
+[dependencies]
