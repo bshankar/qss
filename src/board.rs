@@ -1,4 +1,4 @@
-macro_rules! direction {
+macro_rules! get {
     ($self: ident, $name: ident) => {
         pub fn $name(&$self, e: u16) -> u16 {
             $self.$name[e as usize]
@@ -6,11 +6,20 @@ macro_rules! direction {
     }
 }
 
-macro_rules! set_direction {
+macro_rules! set {
     ($self: ident, $name: ident, $dir: ident, $opp_dir: ident) => {
         fn $name(&mut $self, a: u16, b: u16) {
             $self.$dir[a as usize] = b;
             $self.$opp_dir[b as usize] = a;
+        }
+    }
+}
+
+macro_rules! remove {
+    ($self: ident, $name: ident, $dir: ident, $opp_dir: ident) => {
+        fn $name(&mut $self, a: u16) {
+            $self.$opp_dir[$self.$dir[a as usize] as usize] = $self.$opp_dir[a as usize];
+            $self.$dir[$self.$opp_dir[a as usize] as usize] = $self.$dir[a as usize];
         }
     }
 }
@@ -39,12 +48,14 @@ impl Board {
         board
     }
 
-    direction!(self, up);
-    direction!(self, down);
-    direction!(self, left);
-    direction!(self, right);
-    set_direction!(self, set_up, up, down);
-    set_direction!(self, set_left, left, right);
+    get!(self, up);
+    get!(self, down);
+    get!(self, left);
+    get!(self, right);
+    set!(self, set_up, up, down);
+    set!(self, set_left, left, right);
+    remove!(self, remove_from_column, up, down);
+    remove!(self, remove_from_row, left, right);
 
     fn horizontal(&mut self) {
         for c in 0..323 {
