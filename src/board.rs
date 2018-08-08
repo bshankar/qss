@@ -53,6 +53,7 @@ pub struct Board {
     right: [u16; 3240],
     column: [u16; 2916],
     sizes: [u8; 324],
+    root: u16,
 }
 
 impl Board {
@@ -64,6 +65,7 @@ impl Board {
             right: [0; 3240],
             column: [0; 2916],
             sizes: [9; 324],
+            root: 324,
         };
         board.horizontal();
         board.vertical();
@@ -79,12 +81,14 @@ impl Board {
     cover_method!(self, uncover, add_back_row, add_back_column, +=);
 
     fn horizontal(&mut self) {
-        for c in 0..323 {
+        let root = self.root;
+        for c in 0..324 {
             self.link_right(c, c + 1);
         }
-        self.link_right(323, 0); // TODO root node!
+        self.link_right(324, root);
+        self.link_right(root, 0);
 
-        for r in (324..1053).step_by(4) {
+        for r in (325..1054).step_by(4) {
             for c in 0..4 {
                 self.link_right(r + c, r + c + 1);
             }
@@ -94,7 +98,7 @@ impl Board {
 
     fn vertical(&mut self) {
         let mut boc: Vec<u16> = (0..324).collect();
-        let start = 324;
+        let start = 325;
 
         for c in 0..81 {
             for d in 0..9 {
