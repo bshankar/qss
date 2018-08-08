@@ -1,12 +1,4 @@
-macro_rules! get {
-    ($self: ident, $name: ident) => {
-        pub fn $name(&$self, e: u16) -> u16 {
-            $self.$name[e as usize]
-        }
-    }
-}
-
-macro_rules! set {
+macro_rules! link {
     ($self: ident, $name: ident, $dir: ident, $opp_dir: ident) => {
         fn $name(&mut $self, a: u16, b: u16) {
             $self.$dir[a as usize] = b;
@@ -37,18 +29,18 @@ macro_rules! cover_method {
     ($self: ident, $name: ident, $frow: ident, $fcol: ident, $op: tt) => {
         pub fn $name(&mut $self, c: u16) {
             $self.$frow(c);
-            let mut i = $self.down(c);
+            let mut i = $self.down[c as usize];
             while i != c {
-                let j = $self.right(i);
-                let k = $self.right(j);
-                let l = $self.right(k);
+                let j = $self.right[i as usize];
+                let k = $self.right[j as usize];
+                let l = $self.right[k as usize];
                 $self.column[j as usize] $op 1;
                 $self.column[k as usize] $op 1;
                 $self.column[l as usize] $op 1;
                 $self.$fcol(j);
                 $self.$fcol(k);
                 $self.$fcol(l);
-                i = $self.down(i);
+                i = $self.down[i as usize];
             }
         }
     }
@@ -77,13 +69,8 @@ impl Board {
         board.vertical();
         board
     }
-
-    get!(self, up);
-    get!(self, down);
-    get!(self, left);
-    get!(self, right);
-    set!(self, set_up, up, down);
-    set!(self, set_left, left, right);
+    link!(self, link_down, down, up);
+    link!(self, link_right, right, left);
     add_back!(self, add_back_row, up, down);
     add_back!(self, add_back_column, left, right);
     remove!(self, remove_from_column, up, down);
@@ -93,15 +80,15 @@ impl Board {
 
     fn horizontal(&mut self) {
         for c in 0..323 {
-            self.set_left(c + 1, c);
+            self.link_right(c, c + 1);
         }
-        self.set_left(0, 323);
+        self.link_right(323, 0); // TODO root node!
 
         for r in (324..1053).step_by(4) {
             for c in 0..4 {
-                self.set_left(r + c + 1, r + c);
+                self.link_right(r + c, r + c + 1);
             }
-            self.set_left(r, r + 3);
+            self.link_right(r + 3, r);
         }
     }
 
@@ -112,12 +99,12 @@ impl Board {
         for c in 0..81 {
             for d in 0..9 {
                 let v = 4 * (9 * c + d) + start;
-                self.set_up(v, boc[c as usize]);
-                self.set_up(v + 1, boc[(c / 9 * 9 + d + 81) as usize]);
-                self.set_up(v + 2, boc[(c % 9 * 9 + d + 162) as usize]);
-                self.set_up(
-                    v + 3,
+                self.link_down(boc[c as usize], v);
+                self.link_down(boc[(c / 9 * 9 + d + 81) as usize], v + 1);
+                self.link_down(boc[(c % 9 * 9 + d + 162) as usize], v + 2);
+                self.link_down(
                     boc[((c / 3 - c / 9 * 3 + c / 27 * 3) * 9 + d + 243) as usize],
+                    v + 3,
                 );
 
                 boc[c as usize] = v;
@@ -128,7 +115,7 @@ impl Board {
         }
 
         for c in 0..324 {
-            self.set_up(c, boc[c as usize]);
+            self.link_down(boc[c as usize], c);
         }
     }
 }
