@@ -9,7 +9,7 @@ macro_rules! link {
 
 macro_rules! remove {
     ($self: ident, $name: ident, $dir: ident, $opp_dir: ident) => {
-        pub fn $name(&mut $self, a: u16) {
+        fn $name(&mut $self, a: u16) {
             $self.$opp_dir[$self.$dir[a as usize] as usize] = $self.$opp_dir[a as usize];
             $self.$dir[$self.$opp_dir[a as usize] as usize] = $self.$dir[a as usize];
         }
@@ -18,7 +18,7 @@ macro_rules! remove {
 
 macro_rules! add_back {
     ($self: ident, $name: ident, $dir: ident, $opp_dir: ident) => {
-        pub fn $name(&mut $self, a: u16) {
+        fn $name(&mut $self, a: u16) {
             $self.$opp_dir[$self.$dir[a as usize] as usize] = a;
             $self.$dir[$self.$opp_dir[a as usize] as usize] = a;
         }
@@ -46,8 +46,8 @@ macro_rules! cover_method {
 macro_rules! search_helper {
     ($self:ident, $r:ident, $dir:ident, $fn:ident) => {{
         let mut j = $self.$dir[$r as usize];
-        let c = $self.column[j as usize];
         for _i in 0..3 {
+            let c = $self.column[(j - 325) as usize];
             $self.$fn(c);
             j = $self.$dir[j as usize];
         }
@@ -55,14 +55,15 @@ macro_rules! search_helper {
 }
 
 pub struct Board {
-    pub up: [u16; 3241],
-    pub down: [u16; 3241],
-    pub left: [u16; 3241],
-    pub right: [u16; 3241],
+    up: [u16; 3241],
+    down: [u16; 3241],
+    left: [u16; 3241],
+    right: [u16; 3241],
     column: [u16; 2916],
     sizes: [u8; 324],
-    pub solution: [u16; 3241],
-    pub root: u16,
+    solution: [u16; 3241],
+    solutions: u8,
+    root: u16,
 }
 
 impl Board {
@@ -75,6 +76,7 @@ impl Board {
             column: [0; 2916],
             sizes: [9; 324],
             solution: [0; 3241],
+            solutions: 0,
             root: 324,
         };
         board.horizontal();
@@ -95,11 +97,11 @@ impl Board {
         for c in 0..324 {
             self.link_right(c, c + 1);
         }
-        self.link_right(324, root);
+        self.link_right(323, root);
         self.link_right(root, 0);
 
-        for r in (325..1054).step_by(4) {
-            for c in 0..4 {
+        for r in (325..3241).step_by(4) {
+            for c in 0..3 {
                 self.link_right(r + c, r + c + 1);
             }
             self.link_right(r + 3, r);
@@ -133,14 +135,15 @@ impl Board {
         }
     }
 
-    pub fn choose(&self) -> u16 {
+    fn choose(&self) -> u16 {
         let mut min_column = 0;
         let mut min_size = 10;
         let mut c = self.right[self.root as usize];
         while c != self.root {
             if self.sizes[c as usize] == 1 {
-                return min_column;
+                return c;
             }
+
             if self.sizes[c as usize] < min_size {
                 min_size = self.sizes[c as usize];
                 min_column = c;
@@ -151,11 +154,15 @@ impl Board {
     }
 
     pub fn search(&mut self, k: u32) {
-        if self.right[self.root as usize] == self.root {
-            println!("solved!");
+        if self.solutions >= 2 {
             return;
         }
 
+        if self.right[self.root as usize] == self.root {
+            println!("solved!");
+            self.solutions += 1;
+            return;
+        }
         let c = self.choose();
         self.cover(c);
         let mut r = self.down[c as usize];
