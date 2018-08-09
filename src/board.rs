@@ -89,8 +89,6 @@ impl Board {
     add_back!(self, add_back_column, down, up);
     remove!(self, remove_from_column, down, up);
     remove!(self, remove_from_row, right, left);
-    cover_method!(self, cover, remove_from_row, remove_from_column, -=);
-    cover_method!(self, uncover, add_back_row, add_back_column, +=);
 
     fn horizontal(&mut self) {
         let root = self.root;
@@ -108,24 +106,27 @@ impl Board {
         }
     }
 
+    pub fn columns(&self, c: u16, d: u16) -> [u16; 4] {
+        [
+            c,
+            c / 9 * 9 + d + 81,
+            c % 9 * 9 + d + 162,
+            (c / 3 - c / 9 * 3 + c / 27 * 3) * 9 + d + 243,
+        ]
+    }
+
     fn vertical(&mut self) {
         let mut boc: Vec<u16> = (0..324).collect();
         let start = 325;
 
         for c in 0..81 {
             for d in 0..9 {
-                let v = 4 * (9 * c + d) + start;
-                let cs = [
-                    c,
-                    c / 9 * 9 + d + 81,
-                    c % 9 * 9 + d + 162,
-                    (c / 3 - c / 9 * 3 + c / 27 * 3) * 9 + d + 243,
-                ];
-
+                let v: u16 = 4 * (9 * c + d) + start;
                 for i in 0..4 {
-                    self.link_down(boc[cs[i]], (v + i) as u16);
-                    self.column[v + i - 325] = cs[i] as u16;
-                    boc[cs[i]] = (v + i) as u16;
+                    let cs = self.columns(c, d);
+                    self.link_down(boc[cs[i] as usize], v + i as u16);
+                    self.column[v as usize + i - 325] = cs[i];
+                    boc[cs[i] as usize] = v + i as u16;
                 }
             }
         }
@@ -153,13 +154,16 @@ impl Board {
         min_column
     }
 
-    pub fn search(&mut self, k: u32) {
-        if self.solutions >= 2 {
+    cover_method!(self, cover, remove_from_row, remove_from_column, -=);
+    cover_method!(self, uncover, add_back_row, add_back_column, +=);
+
+    pub fn search(&mut self, k: u32, p: &Fn([u16; 3241], u32)) {
+        if self.solutions >= 1 {
             return;
         }
 
         if self.right[self.root as usize] == self.root {
-            println!("solved!");
+            p(self.solution, k);
             self.solutions += 1;
             return;
         }
@@ -169,7 +173,7 @@ impl Board {
         while r != c {
             self.solution[k as usize] = r;
             search_helper!(self, r, right, cover);
-            self.search(k + 1);
+            self.search(k + 1, p);
             search_helper!(self, r, left, uncover);
             r = self.down[r as usize];
         }
