@@ -31,15 +31,12 @@ macro_rules! cover_method {
             $self.$frow(c);
             let mut i = $self.down[c as usize];
             while i != c {
-                let j = $self.right[i as usize];
-                let k = $self.right[j as usize];
-                let l = $self.right[k as usize];
-                $self.column[j as usize] $op 1;
-                $self.column[k as usize] $op 1;
-                $self.column[l as usize] $op 1;
-                $self.$fcol(j);
-                $self.$fcol(k);
-                $self.$fcol(l);
+                let mut j = $self.right[i as usize];
+                for _k in 0..3 {
+                    $self.$fcol(j);
+                    $self.column[j as usize] $op 1;
+                    j = $self.right[j as usize];
+                }
                 i = $self.down[i as usize];
             }
         }
@@ -103,18 +100,17 @@ impl Board {
         for c in 0..81 {
             for d in 0..9 {
                 let v = 4 * (9 * c + d) + start;
-                self.link_down(boc[c as usize], v);
-                self.link_down(boc[(c / 9 * 9 + d + 81) as usize], v + 1);
-                self.link_down(boc[(c % 9 * 9 + d + 162) as usize], v + 2);
-                self.link_down(
-                    boc[((c / 3 - c / 9 * 3 + c / 27 * 3) * 9 + d + 243) as usize],
-                    v + 3,
-                );
+                let cs = [
+                    c,
+                    c / 9 * 9 + d + 81,
+                    c % 9 * 9 + d + 162,
+                    (c / 3 - c / 9 * 3 + c / 27 * 3) * 9 + d + 243,
+                ];
 
-                boc[c as usize] = v;
-                boc[(c / 9 * 9 + d + 81) as usize] = v + 1;
-                boc[(c % 9 * 9 + d + 162) as usize] = v + 2;
-                boc[((c / 3 - c / 9 * 3 + c / 27 * 3) * 9 + d + 243) as usize] = v + 3;
+                for i in 0..4 {
+                    self.link_down(boc[cs[i]], (v + i) as u16);
+                    boc[cs[i]] = (v + i) as u16;
+                }
             }
         }
 
