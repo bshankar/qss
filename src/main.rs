@@ -1,12 +1,12 @@
 mod board;
 mod solve;
+use std::io::{self, BufRead};
 
-fn main() {
+fn main() -> io::Result<()> {
     let mut b = board::Board::new();
-    solve::solve(
-        &"000000010400000000020000000000050407008000300001090000300400200050100000000806000"
-            .to_string(),
-        &mut b,
-        false,
-    );
+    let stdin = io::stdin();
+    for line in stdin.lock().lines() {
+        solve::solve(&line?, &mut b);
+    }
+    Ok(())
 }

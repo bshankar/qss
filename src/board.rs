@@ -144,7 +144,6 @@ impl Board {
             if self.sizes[c as usize] == 1 {
                 return c;
             }
-
             if self.sizes[c as usize] < min_size {
                 min_size = self.sizes[c as usize];
                 min_column = c;
@@ -158,7 +157,7 @@ impl Board {
     cover_method!(self, uncover, add_back_row, add_back_column, +=);
 
     pub fn search(&mut self, k: u32, p: &Fn([u16; 3241], u32)) {
-        if self.solutions >= 1 {
+        if self.solutions != 0 {
             return;
         }
 
@@ -178,5 +177,9 @@ impl Board {
             r = self.down[r as usize];
         }
         self.uncover(c);
+    }
+
+    pub fn reset_solutions(&mut self) {
+        self.solutions = 0;
     }
 }

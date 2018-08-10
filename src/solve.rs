@@ -4,7 +4,7 @@ fn empty(ch: char) -> bool {
     ch == '0' || ch == '.'
 }
 
-pub fn print_solution(s: [u16; 3241], k: u32, givens: Vec<char>, silent: bool) {
+pub fn print_solution(s: [u16; 3241], k: u32, givens: Vec<char>) {
     let mut solution: Vec<char> = givens;
     for i in 0..k {
         let r = (s[i as usize] - 325) / 4;
@@ -13,9 +13,7 @@ pub fn print_solution(s: [u16; 3241], k: u32, givens: Vec<char>, silent: bool) {
         solution[cell as usize] = (digit + 49) as char;
     }
     let sol: String = solution.iter().collect();
-    if !silent {
-        println!("{}", sol);
-    }
+    println!("{}", sol);
 }
 
 fn prepare(s: &String, b: &mut Board) -> Vec<u16> {
@@ -33,13 +31,15 @@ fn prepare(s: &String, b: &mut Board) -> Vec<u16> {
     covered
 }
 
-// fn reset(s: , b: ) {}
-
-pub fn solve(s: &String, b: &mut Board, silent: bool) {
-    let cs = prepare(s, b);
-    b.search(0, &|sol, k| {
-        print_solution(sol, k, s.chars().collect(), silent)
-    });
+fn reset(cs: Vec<u16>, b: &mut Board) {
+    for &c in cs.iter().rev() {
+        b.uncover(c);
+    }
+    b.reset_solutions();
 }
 
-// fn bench(s: ) {}
+pub fn solve(s: &String, b: &mut Board) {
+    let cs = prepare(s, b);
+    b.search(0, &|sol, k| print_solution(sol, k, s.chars().collect()));
+    reset(cs, b);
+}
