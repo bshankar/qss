@@ -62,7 +62,7 @@ pub struct Board {
     column: [u16; 2916],
     sizes: [u8; 324],
     solution: [u16; 729],
-    solutions: u8,
+    solved: bool,
     root: u16,
 }
 
@@ -76,7 +76,7 @@ impl Board {
             column: [0; 2916],
             sizes: [9; 324],
             solution: [0; 729],
-            solutions: 0,
+            solved: false,
             root: 324,
         };
         board.horizontal();
@@ -157,13 +157,13 @@ impl Board {
     cover_method!(self, uncover, add_back_row, add_back_column, +=);
 
     pub fn search(&mut self, k: u32, p: &Fn([u16; 729], u32)) {
-        if self.solutions != 0 {
+        if self.solved {
             return;
         }
 
         if self.right[self.root as usize] == self.root {
             p(self.solution, k);
-            self.solutions += 1;
+            self.solved = true;
             return;
         }
         let c = self.choose();
@@ -180,6 +180,6 @@ impl Board {
     }
 
     pub fn reset_solutions(&mut self) {
-        self.solutions = 0;
+        self.solved = false;
     }
 }
