@@ -157,7 +157,7 @@ impl Board {
     cover_method!(self, uncover, add_back_row, add_back_column, +=);
 
     pub fn search(&mut self, k: u32, p: &Fn([u16; 729], u32)) {
-        if self.solutions > 1 {
+        if self.solutions != 0 {
             return;
         }
 
