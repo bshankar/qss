@@ -1,0 +1,32 @@
+* Quick Sudoku solver
+  Is a fast implementation of the Dancing Links Algorithm applied to Sudoku.
+  This is a rust rewrite of a [[https://github.com/bshankar/fastSS][Sudoku solver]] that I wrote a while
+  back. Stripped off some mediocre features and made some improvements including
+
+  - Compacted the data structure with 16 bit cache-friendly pointers
+
+  - Removed some unnecessary fields.
+
+  - Much neater and safer code. (Thanks to Rust!)
+
+  - About 30% faster. Solves all [[http://www.sudocue.net/files/top50000.zip][50000 hardest puzzles]] collection in 1.9s on my laptop.
+
+* Usage
+  Write the Sudoku as a string of 81 characters and pass it to
+  =Stdin= of qss. Example usage:
+
+  #+BEGIN_SRC bash
+  # compile
+  $ cargo build --release
+  $ cd target/release
+
+  # solve a puzzle
+  $ echo "000000010400000000020000000000050407008000300001090000300400200050100000000806000" | qss
+    693784512487512936125963874932651487568247391741398625319475268856129743274836159
+
+  # solve puzzles from a file
+  $ qss < file.txt
+
+  # benchmarking
+  $ time cargo run --release < file.txt > /dev/null
+  #+END_SRC
