@@ -141,7 +141,7 @@ impl Board {
         let mut min_size = 10;
         let mut c = self.right[self.root as usize];
         while c != self.root {
-            if self.sizes[c as usize] == 1 {
+            if self.sizes[c as usize] <= 1 {
                 return c;
             }
             if self.sizes[c as usize] < min_size {
