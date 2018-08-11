@@ -61,7 +61,7 @@ pub struct Board {
     right: [u16; 3241],
     column: [u16; 2916],
     sizes: [u8; 324],
-    solution: [u16; 3241],
+    solution: [u16; 729],
     solutions: u8,
     root: u16,
 }
@@ -75,7 +75,7 @@ impl Board {
             right: [0; 3241],
             column: [0; 2916],
             sizes: [9; 324],
-            solution: [0; 3241],
+            solution: [0; 729],
             solutions: 0,
             root: 324,
         };
@@ -156,8 +156,8 @@ impl Board {
     cover_method!(self, cover, remove_from_row, remove_from_column, -=);
     cover_method!(self, uncover, add_back_row, add_back_column, +=);
 
-    pub fn search(&mut self, k: u32, p: &Fn([u16; 3241], u32)) {
-        if self.solutions != 0 {
+    pub fn search(&mut self, k: u32, p: &Fn([u16; 729], u32)) {
+        if self.solutions > 1 {
             return;
         }
 

@@ -4,7 +4,7 @@ fn empty(ch: char) -> bool {
     ch == '0' || ch == '.'
 }
 
-pub fn print_solution(s: [u16; 3241], k: u32, givens: Vec<char>) {
+pub fn print_solution(s: [u16; 729], k: u32, givens: Vec<char>) {
     let mut solution: Vec<char> = givens;
     for i in 0..k {
         let r = (s[i as usize] - 325) / 4;
