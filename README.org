@@ -7,7 +7,7 @@
 
   - Removed some unnecessary fields.
 
-  - Much neater and safer code. (Thanks to Rust!)
+  - Smaller, neater and safer code. (Thanks to Rust!)
 
   - About 30% faster. Solves all [[http://www.sudocue.net/files/top50000.zip][50000 hardest puzzles]] collection in 1.9s on my laptop.
 
