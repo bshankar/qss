@@ -83,12 +83,15 @@ impl Board {
         board.vertical();
         board
     }
+
     link!(self, link_down, down, up);
     link!(self, link_right, right, left);
     add_back!(self, add_back_row, right, left);
     add_back!(self, add_back_column, down, up);
     remove!(self, remove_from_column, down, up);
     remove!(self, remove_from_row, right, left);
+    cover_method!(self, cover, remove_from_row, remove_from_column, -=);
+    cover_method!(self, uncover, add_back_row, add_back_column, +=);
 
     fn horizontal(&mut self) {
         let root = self.root;
@@ -117,11 +120,10 @@ impl Board {
 
     fn vertical(&mut self) {
         let mut boc: Vec<u16> = (0..324).collect();
-        let start = 325;
 
         for c in 0..81 {
             for d in 0..9 {
-                let v: u16 = 4 * (9 * c + d) + start;
+                let v: u16 = 4 * (9 * c + d) + 325;
                 for i in 0..4 {
                     let cs = self.columns(c, d);
                     self.link_down(boc[cs[i] as usize], v + i as u16);
@@ -153,9 +155,6 @@ impl Board {
         min_column
     }
 
-    cover_method!(self, cover, remove_from_row, remove_from_column, -=);
-    cover_method!(self, uncover, add_back_row, add_back_column, +=);
-
     pub fn search(&mut self, k: u32, p: &Fn([u16; 729], u32)) {
         if self.solved {
             return;
@@ -166,6 +165,7 @@ impl Board {
             self.solved = true;
             return;
         }
+
         let c = self.choose();
         self.cover(c);
         let mut r = self.down[c as usize];
